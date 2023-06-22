@@ -28,9 +28,9 @@ typedef enum{
 }en_app_sub_state_t;
 
 typedef enum{
-    RUNNING        = 0 , // Running
-    SWITCHING       ,    // Switching sub-state
-    STARTED         ,    // switched and started successfully
+    RUNNING        = 0  ,   // Running
+    SWITCHING           ,   // Switching sub-state
+    STARTED             ,   // switched and started successfully
     STATES_TOTAL
 }en_app_state_t;
 
@@ -46,10 +46,10 @@ typedef enum{
 #define RED_LED_PORT 		LED_PORT_F // Port F
 #define RED_LED_PIN			LED_PIN_1
 
-#define GREEN_LED_PORT 	LED_PORT_F // Port F
+#define GREEN_LED_PORT 	    LED_PORT_F // Port F
 #define GREEN_LED_PIN		LED_PIN_3
 
-#define BLUE_LED_PORT 	LED_PORT_F // Port F
+#define BLUE_LED_PORT 	    LED_PORT_F // Port F
 #define BLUE_LED_PIN		LED_PIN_2
 
 #define USER_BTN_PORT		BTN_PORT_F // Port F
