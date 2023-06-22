@@ -104,7 +104,7 @@ en_app_error_t app_init(void)
     en_systick_error_t en_systick_error = ST_OK;
 
     /* init RGB LEDS */
-    for (int i = 0; i < RGB_LEDS_COUNT; ++i) {
+    for (int i = ZERO; i < RGB_LEDS_COUNT; ++i) {
         en_led_error = led_init(gl_st_app_leds[i].en_led_port, gl_st_app_leds[i].en_led_pin);
         if(LED_OK != en_led_error) en_app_error_retval = APP_FAIL;
     }
@@ -143,7 +143,7 @@ en_app_error_t app_init(void)
 
 void app_start(void)
 {
-    while(1)
+    while(TRUE)
     {
         en_btn_state_t_ en_btn_state = BTN_STATE_NOT_PRESSED;
         btn_read(&gl_st_user_btn_cfg, &en_btn_state);
@@ -240,7 +240,7 @@ static void app_next_state(void)
     led_off(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
 
     // next state led color
-    gl_u8_current_led_idx = ((gl_u8_current_led_idx + 1) % RGB_LEDS_COUNT);
+    gl_u8_current_led_idx = INC_WITH_MOD(gl_u8_current_led_idx, RGB_LEDS_COUNT);
 
     // turn on next state color
     led_on(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
@@ -249,26 +249,26 @@ static void app_next_state(void)
     if(SUB_STATE_1_DUTY_IN_PERCENT == gl_en_app_sub_state)
     {
         gpt_start(TIME_ON_DELAY_TIMER,
-                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * (SUB_STATE_1_DUTY_IN_PERCENT/100.0)),
+                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * GET_PERCENTAGE(SUB_STATE_1_DUTY_IN_PERCENT)),
                   TIME_IN_MS);
     }
     else if(SUB_STATE_2_DUTY_IN_PERCENT == gl_en_app_sub_state)
     {
         gpt_start(TIME_ON_DELAY_TIMER,
-                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * (SUB_STATE_2_DUTY_IN_PERCENT/100.0)),
+                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * GET_PERCENTAGE(SUB_STATE_2_DUTY_IN_PERCENT)),
                   TIME_IN_MS);
     }
     else if(SUB_STATE_3_DUTY_IN_PERCENT == gl_en_app_sub_state)
     {
         gpt_start(TIME_ON_DELAY_TIMER,
-                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * (SUB_STATE_3_DUTY_IN_PERCENT/100.0)),
+                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * GET_PERCENTAGE(SUB_STATE_3_DUTY_IN_PERCENT)),
                   TIME_IN_MS);
     }
     else // bad state - reset
     {
         gl_en_app_sub_state = SUB_STATE_1_DUTY_IN_PERCENT;
         gpt_start(TIME_ON_DELAY_TIMER,
-                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * (SUB_STATE_1_DUTY_IN_PERCENT/100.0)),
+                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * GET_PERCENTAGE(SUB_STATE_1_DUTY_IN_PERCENT)),
                   TIME_IN_MS);
     }
 
