@@ -125,7 +125,7 @@ en_app_error_t app_init(void)
      */
 
     /* Init timers */
-    en_gpt_status_t en_gpt_status = gpt_init(gl_st_gpt_lconfig_arr);
+    en_gpt_status_t en_gpt_status = gpt_init();
     if(GPT_OK != en_gpt_status) en_app_error_retval = APP_FAIL;
 
     // set timers callbacks

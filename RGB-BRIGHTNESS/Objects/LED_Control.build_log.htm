@@ -27,17 +27,11 @@ Project File Date:  06/22/2023
 <h2>Output:</h2>
 *** Using Compiler 'V6.19', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'Target 1'
-compiling gpt_linking_cfg.c...
-APP/app.c(128): error: too many arguments to function call, expected 0, have 1
-    en_gpt_status_t en_gpt_status = gpt_init(gl_st_gpt_lconfig_arr);
-                                    ~~~~~~~~ ^~~~~~~~~~~~~~~~~~~~~
-./MCAL/gpt/gpt_interface.h(65): note: 'gpt_init' declared here
-en_gpt_status_t gpt_init(void);
-                ^
-1 error generated.
 compiling app.c...
-compiling gpt_program.c...
-".\Objects\LED_Control.axf" - 1 Error(s), 0 Warning(s).
+linking...
+Program Size: Code=14792 RO-data=652 RW-data=24 ZI-data=872  
+FromELF: creating hex file...
+".\Objects\LED_Control.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -66,7 +60,6 @@ Package Vendor: Keil
       Source file:   Device/Source/ARM/startup_TM4C123.s
       Source file:   Device/Source/system_TM4C123.c
       Include file:  Device/Include/TM4C123/TM4C123.h
-Target not created.
 Build Time Elapsed:  00:00:01
 </pre>
 </body>
