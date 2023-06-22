@@ -39,7 +39,6 @@ typedef enum{
     TIME_UNITS_TOTAL
 }en_gpt_time_unit_t;
 
-
 typedef enum{
     CH_0    = 0 ,
     CH_1        ,
@@ -56,29 +55,8 @@ typedef enum{
     CH_TOTAL
 }en_gpt_channel_t;
 
-// todo support more modes
-typedef enum{
-    CH_MODE_ONE_SHOT = 0    ,
-    CH_MODE_PERIODIC        ,
-    CH_MODE_TOTAL
-}en_gpt_channel_mode_t;
 
-
-typedef enum{
-    GPT_INT_ENABLED = 0     ,
-    GPT_INT_DISABLED        ,
-    GPT_INT_TOTAl
-}en_gpt_int_enabled_t;
-
-typedef void (* ptr_vd_fun_vd_t)(void);
-
-typedef struct gpt_config {
-    en_gpt_channel_t        en_gpt_channel_id;
-    en_gpt_channel_mode_t   en_gpt_channel_mode;
-    en_gpt_int_enabled_t    en_gpt_int_enabled;
-}st_gpt_config_t;
-
-en_gpt_status_t gpt_init(st_gpt_config_t * st_a_gpt_config_arr);
+en_gpt_status_t gpt_init(void);
 
 en_gpt_status_t gpt_enable_notification(en_gpt_channel_t en_a_gpt_channel);
 en_gpt_status_t gpt_disable_notification(en_gpt_channel_t en_a_gpt_channel);

@@ -20,6 +20,8 @@ typedef                     void        vd_t_;
 
 typedef unsigned 		char								boolean;
 
+typedef     void     (* ptr_vd_fun_vd_t)    (void);
+
 #define GET_PERCENTAGE(x) ((f64_t_) x/100.0)
 #define INC_WITH_MOD(num,mod)     ((num + 1) % mod)
 

@@ -22,7 +22,6 @@ static ptr_vd_fun_vd_t gl_callbacks_array[CH_TOTAL] = {NULL_PTR};
 
 /**
  * @brief                           :   Initializes GPT timers
- * @param[in]   en_a_gpt_channel    :   GPT Timers' configurations arrays
  *
  * @return      GPT_OK              :   If Success
  *              GPT_ERROR           :   If Failed
@@ -30,86 +29,78 @@ static ptr_vd_fun_vd_t gl_callbacks_array[CH_TOTAL] = {NULL_PTR};
  *              GPT_INVALID_CFG     :   Bad Config
  *
  */
-en_gpt_status_t gpt_init(st_gpt_config_t * st_a_gpt_config_arr)
+en_gpt_status_t gpt_init(void)
 {
     en_gpt_status_t en_gpt_status_retval = GPT_OK;
 
     if(FALSE == gl_gpt_initialized)
     {
-        // args check
-        if(NULL_PTR == st_a_gpt_config_arr)
+        // init timers
+        for (int i = 0; i < GPT_CONFIGURED_TIMERS_CHS_COUNT; i++)
         {
-            en_gpt_status_retval = GPT_INVALID_ARGS;
-        }
-        else
-        {
-            // init timers
-            for (int i = 0; i < GPT_CONFIGURED_TIMERS_CHS_COUNT; i++)
-            {
-                // config check
-                if(
-                        (st_a_gpt_config_arr[i].en_gpt_channel_id >= CH_TOTAL) ||
-                        (st_a_gpt_config_arr[i].en_gpt_channel_mode >= CH_MODE_TOTAL)
+            // config check
+            if(
+                    (gl_st_gpt_lconfig_arr[i].en_gpt_channel_id >= CH_TOTAL) ||
+                    (gl_st_gpt_lconfig_arr[i].en_gpt_channel_mode >= CH_MODE_TOTAL)
 //                        ((st_a_gpt_config_arr[i].uint32_prescale_value > 0xFFFF) && (st_a_gpt_config_arr[i].en_gpt_channel_id < CH_6_W)) // non wide only supports 8 bit prescaler
-                        )
+                    )
+            {
+                en_gpt_status_retval = GPT_INVALID_CFG;
+                break; // break inits
+            }
+
+            /* Enable Timer Gating Control */
+            if(gl_st_gpt_lconfig_arr[i].en_gpt_channel_id <= 5)
+            {
+                SET_BIT(RCGCTIMER_REG_ADDRESS, gl_st_gpt_lconfig_arr[i].en_gpt_channel_id);
+            }
+            else
+            {
+                SET_BIT(RCGCWTIMER_REG_ADDRESS, gl_st_gpt_lconfig_arr[i].en_gpt_channel_id % 6);
+            }
+
+            uint32_t_ uint32_l_base_address = gpt_get_timer_base_address(gl_st_gpt_lconfig_arr[i].en_gpt_channel_id);
+            if(0 != uint32_l_base_address)
+            {
+                // initialize timer
+                // todo support concat mode
+                SET_BIT(GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMCFG_REG_OFFSET), GPTMCFG_NOT_CONCAT_BIT);
+
+                if(CH_MODE_ONE_SHOT == gl_st_gpt_lconfig_arr[i].en_gpt_channel_mode)
+                {
+                    SET_BIT(GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAMR_REG_OFFSET), GPTMTXMR_ONE_SHOT_BIT);
+                }
+                else if(CH_MODE_PERIODIC == gl_st_gpt_lconfig_arr[i].en_gpt_channel_mode)
+                {
+                    SET_BIT(GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAMR_REG_OFFSET), GPTMTXMR_PERIODIC_BIT);
+                }
+                else
                 {
                     en_gpt_status_retval = GPT_INVALID_CFG;
                     break; // break inits
                 }
 
-                /* Enable Timer Gating Control */
-                if(st_a_gpt_config_arr[i].en_gpt_channel_id <= 5)
+                // set count direction to down
+                // todo support up count - CLEAR : Count Down, SET : Count Up
+                CLR_BIT(GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAMR_REG_OFFSET), GPTMTXMR_DIR_BIT);
+
+                // enable interrupts if requested
+                if(GPT_INT_ENABLED == gl_st_gpt_lconfig_arr[i].en_gpt_int_enabled)
                 {
-                    SET_BIT(RCGCTIMER_REG_ADDRESS, st_a_gpt_config_arr[i].en_gpt_channel_id);
+                    gpt_enable_notification(gl_st_gpt_lconfig_arr[i].en_gpt_channel_id);
                 }
-                else
-                {
-                    SET_BIT(RCGCWTIMER_REG_ADDRESS, st_a_gpt_config_arr[i].en_gpt_channel_id % 6);
-                }
-
-                uint32_t_ uint32_l_base_address = gpt_get_timer_base_address(st_a_gpt_config_arr[i].en_gpt_channel_id);
-                if(0 != uint32_l_base_address)
-                {
-                    // initialize timer
-                    // todo support concat mode
-                    SET_BIT(GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMCFG_REG_OFFSET), GPTMCFG_NOT_CONCAT_BIT);
-
-                    if(CH_MODE_ONE_SHOT == st_a_gpt_config_arr[i].en_gpt_channel_mode)
-                    {
-                        SET_BIT(GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAMR_REG_OFFSET), GPTMTXMR_ONE_SHOT_BIT);
-                    }
-                    else if(CH_MODE_PERIODIC == st_a_gpt_config_arr[i].en_gpt_channel_mode)
-                    {
-                        SET_BIT(GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAMR_REG_OFFSET), GPTMTXMR_PERIODIC_BIT);
-                    }
-                    else
-                    {
-                        en_gpt_status_retval = GPT_INVALID_CFG;
-                        break; // break inits
-                    }
-
-                    // set count direction to down
-                    // todo support up count - CLEAR : Count Down, SET : Count Up
-                    CLR_BIT(GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAMR_REG_OFFSET), GPTMTXMR_DIR_BIT);
-
-                    // enable interrupts if requested
-                    if(GPT_INT_ENABLED == st_a_gpt_config_arr[i].en_gpt_int_enabled)
-                    {
-                        gpt_enable_notification(st_a_gpt_config_arr[i].en_gpt_channel_id);
-                    }
-
-                }
-                else
-                {
-                    en_gpt_status_retval = GPT_ERROR; // failed to get base address
-                    break; // break inits
-                }
-
 
             }
+            else
+            {
+                en_gpt_status_retval = GPT_ERROR; // failed to get base address
+                break; // break inits
+            }
 
-            gl_gpt_initialized = TRUE;
+
         }
+
+        gl_gpt_initialized = TRUE;
     }
     else
     {
