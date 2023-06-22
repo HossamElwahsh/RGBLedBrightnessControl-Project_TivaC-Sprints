@@ -27,4 +27,9 @@ typedef unsigned 		char								boolean;
 #define ZERO        (0)
 #define NULL_PTR    ((void *) 0)
 
+#define MAX_8_BIT_VAL   0xFF
+#define MAX_16_BIT_VAL  0xFFFF
+#define MAX_24_BIT_VAL  0xFFFFFF
+#define MAX_32_BIT_VAL  0xFFFFFFFF
+
 #endif /* STD_H_ */
