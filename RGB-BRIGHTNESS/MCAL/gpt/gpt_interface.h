@@ -17,8 +17,6 @@
 
 #define GPT_CONFIGURED_TIMERS_CHS_COUNT     3
 
-#define     MAX_PRESCALER_REG_TIMER         255
-#define     MAX_PRESCALER_WIDE_TIMER        65535
 
 /* Typedefs
  * -------------------- */
@@ -56,18 +54,103 @@ typedef enum{
 }en_gpt_channel_t;
 
 
+/**
+ * @brief                           :   Initializes GPT timers
+ *
+ * @return      GPT_OK              :   If Success
+ *              GPT_ERROR           :   If Failed
+ *              GPT_INVALID_CFG     :   Bad Config
+ *
+ */
 en_gpt_status_t gpt_init(void);
 
-en_gpt_status_t gpt_enable_notification(en_gpt_channel_t en_a_gpt_channel);
-en_gpt_status_t gpt_disable_notification(en_gpt_channel_t en_a_gpt_channel);
 
+/**
+ * @brief                             :     Calculates timer values then starts a delay on the requested timer channel
+ *
+ * @param[in]   en_a_gpt_channel      :     Timer Channel
+ * @param[in]   uint32_a_delay_value  :     Delay value in Time Units
+ * @param[in]   en_a_gpt_time_unit    :     Time units (seconds, milli-seconds, micro-seconds)
+ *
+ * @return      GPT_OK                :     If Success
+ *              GPT_INVALID_ARGS      :     Failed, Invalid Args Given
+ *              GPT_NOT_SUPPORTED     :     Failed, Delay value requested isn't supported by selected timer channel
+ */
 en_gpt_status_t gpt_start(en_gpt_channel_t en_a_gpt_channel, uint32_t_ uint32_a_delay_value, en_gpt_time_unit_t en_a_gpt_time_unit);
+
+/**
+ * @brief                           :   Stops timer channel
+ *
+ * @param[in]   en_a_gpt_channel    :   Timer Channel
+ *
+ * @return      GPT_OK              :     If Success
+ *              GPT_ERROR           :     Failed, Error occurred
+ *              GPT_INVALID_ARGS    :     Failed, Invalid Args Given
+ */
 en_gpt_status_t gpt_stop(en_gpt_channel_t en_a_gpt_channel);
 
-en_gpt_status_t gpt_get_elapsed_time(en_gpt_channel_t en_a_gpt_channel, uint32_t_ * uint32_a_elapsed_time);
-en_gpt_status_t gpt_get_remaining_time(en_gpt_channel_t en_a_gpt_channel,  uint32_t_ * uint32_a_rem_time);
 
+/**
+ * @brief                                   :   Get Timer Current Elapsed time
+ *
+ * @param[in]   en_a_gpt_channel            :   Timer Channel
+ * @param[out]  ptr_uint32_a_elapsed_time   :   Ptr to store elapsed time value
+ *
+ * @return      GPT_OK                      :     If Success
+ *              GPT_ERROR                   :     Failed
+ *              GPT_INVALID_ARGS            :     Failed, Invalid Args Given
+ */
+en_gpt_status_t gpt_get_elapsed_time(en_gpt_channel_t en_a_gpt_channel, uint32_t_ * ptr_uint32_a_elapsed_time);
+
+
+/**
+ * @brief                                   :   Get Timer Current Remaining time
+ *
+ * @param[in]   en_a_gpt_channel            :   Timer Channel
+ * @param[out]  ptr_uint32_a_rem_time       :   Ptr to store remaining time value
+ *
+ * @return      GPT_OK                      :   If Success
+ *              GPT_ERROR                   :   Failed
+ *              GPT_INVALID_ARGS            :   Failed, Invalid Args Given
+ */
+en_gpt_status_t gpt_get_remaining_time(en_gpt_channel_t en_a_gpt_channel,  uint32_t_ * ptr_uint32_a_rem_time);
+
+
+/**
+ * @brief                                           :   Sets callback function to a timer channel
+ *
+ * @param[in]   en_a_gpt_channel                    :   Timer channel
+ * @param[in]   ptr_vd_fun_vd_a_gpt_notification    :   Ptr to callback function to store
+ *
+ * @return      GPT_OK                              :   If Success
+ *              GPT_ERROR                           :   Failed
+ *              GPT_INVALID_ARGS                    :   Failed, Invalid Args Given
+ */
 en_gpt_status_t gpt_set_callback(en_gpt_channel_t en_a_gpt_channel, ptr_vd_fun_vd_t ptr_vd_fun_vd_a_gpt_notification);
+
+
+/**
+ * @brief                           :   enables timer channel notification (callback)
+ *
+ * @param       en_a_gpt_channel    :   Timer Channel
+ *
+ * @return      GPT_OK              :   If Success
+ *              GPT_ERROR           :   Failed
+ *              GPT_INVALID_ARGS    :   Failed, Invalid Args Given
+ */
+en_gpt_status_t gpt_enable_notification(en_gpt_channel_t en_a_gpt_channel);
+
+
+/**
+ * @brief                           :   disable timer channel notification (callback)
+ *
+ * @param       en_a_gpt_channel    :   Timer Channel
+ *
+ * @return      GPT_OK              :   If Success
+ *              GPT_ERROR           :   Failed
+ *              GPT_INVALID_ARGS    :   Failed, Invalid Args Given
+ */
+en_gpt_status_t gpt_disable_notification(en_gpt_channel_t en_a_gpt_channel);
 
 
 #endif //GPT_INTERFACE_H

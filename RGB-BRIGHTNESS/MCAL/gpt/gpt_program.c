@@ -25,7 +25,6 @@ static ptr_vd_fun_vd_t gl_callbacks_array[CH_TOTAL] = {NULL_PTR};
  *
  * @return      GPT_OK              :   If Success
  *              GPT_ERROR           :   If Failed
- *              GPT_INVALID_ARGS    :   Null pointer passed
  *              GPT_INVALID_CFG     :   Bad Config
  *
  */
@@ -118,8 +117,8 @@ en_gpt_status_t gpt_init(void)
  * @param[in]   en_a_gpt_time_unit    :     Time units (seconds, milli-seconds, micro-seconds)
  *
  * @return      GPT_OK                :     If Success
- * @return      GPT_INVALID_ARGS      :     Failed, Invalid Args Given
- * @return      GPT_NOT_SUPPORTED     :     Failed, Delay value requested isn't supported by selected timer channel
+ *              GPT_INVALID_ARGS      :     Failed, Invalid Args Given
+ *              GPT_NOT_SUPPORTED     :     Failed, Delay value requested isn't supported by selected timer channel
  */
 en_gpt_status_t gpt_start(en_gpt_channel_t en_a_gpt_channel, uint32_t_ uint32_a_delay_value, en_gpt_time_unit_t en_a_gpt_time_unit)
 {
@@ -171,7 +170,7 @@ en_gpt_status_t gpt_start(en_gpt_channel_t en_a_gpt_channel, uint32_t_ uint32_a_
 
             f64_l_min_tick_time_sec = 1.0 / MC_F_CPU_HZ; // one tick time in seconds
             f64_l_max_total_time_sec =
-                    ((f64_t_) (bool_l_wide_timer ? MAX_PRESCALER_WIDE_TIMER : MAX_PRESCALER_REG_TIMER) / MC_F_CPU_HZ) *
+                    ((f64_t_) (bool_l_wide_timer ? MAX_16_BIT_VAL : MAX_8_BIT_VAL) / MC_F_CPU_HZ) *
                     (bool_l_wide_timer ? MAX_32_BIT_VAL : MAX_16_BIT_VAL);
 
             // check support for requested delay amount
@@ -246,6 +245,15 @@ en_gpt_status_t gpt_start(en_gpt_channel_t en_a_gpt_channel, uint32_t_ uint32_a_
     return en_gpt_status_retval;
 }
 
+/**
+ * @brief                           :   Stops timer channel
+ *
+ * @param[in]   en_a_gpt_channel    :   Timer Channel
+ *
+ * @return      GPT_OK              :     If Success
+ *              GPT_ERROR           :     Failed, Error occurred
+ *              GPT_INVALID_ARGS    :     Failed, Invalid Args Given
+ */
 en_gpt_status_t gpt_stop(en_gpt_channel_t en_a_gpt_channel)
 {
     en_gpt_status_t en_gpt_status_retval = GPT_OK;
@@ -286,13 +294,22 @@ en_gpt_status_t gpt_stop(en_gpt_channel_t en_a_gpt_channel)
     return en_gpt_status_retval;
 }
 
-
-en_gpt_status_t gpt_get_elapsed_time(en_gpt_channel_t en_a_gpt_channel, uint32_t_ * uint32_a_elapsed_time)
+/**
+ * @brief                                   :   Get Timer Current Elapsed time
+ *
+ * @param[in]   en_a_gpt_channel            :   Timer Channel
+ * @param[out]  ptr_uint32_a_elapsed_time   :   Ptr to store elapsed time value
+ *
+ * @return      GPT_OK                      :     If Success
+ *              GPT_ERROR                   :     Failed
+ *              GPT_INVALID_ARGS            :     Failed, Invalid Args Given
+ */
+en_gpt_status_t gpt_get_elapsed_time(en_gpt_channel_t en_a_gpt_channel, uint32_t_ * ptr_uint32_a_elapsed_time)
 {
     en_gpt_status_t en_gpt_status_retval = GPT_OK;
     if(
             (en_a_gpt_channel >= GPT_CONFIGURED_TIMERS_CHS_COUNT) ||
-            (NULL_PTR != uint32_a_elapsed_time)
+            (NULL_PTR != ptr_uint32_a_elapsed_time)
             )
     {
         en_gpt_status_retval = GPT_INVALID_ARGS;
@@ -311,19 +328,29 @@ en_gpt_status_t gpt_get_elapsed_time(en_gpt_channel_t en_a_gpt_channel, uint32_t
                     GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAV_REG_OFFSET);
 
             // update [out] return pointer
-            *uint32_a_elapsed_time = uint32_l_elapsed;
+            *ptr_uint32_a_elapsed_time = uint32_l_elapsed;
         }
     }
 
     return en_gpt_status_retval;
 }
 
-en_gpt_status_t gpt_get_remaining_time(en_gpt_channel_t en_a_gpt_channel,  uint32_t_ * uint32_a_rem_time)
+/**
+ * @brief                                   :   Get Timer Current Remaining time
+ *
+ * @param[in]   en_a_gpt_channel            :   Timer Channel
+ * @param[out]  ptr_uint32_a_rem_time       :   Ptr to store remaining time value
+ *
+ * @return      GPT_OK                      :   If Success
+ *              GPT_ERROR                   :   Failed
+ *              GPT_INVALID_ARGS            :   Failed, Invalid Args Given
+ */
+en_gpt_status_t gpt_get_remaining_time(en_gpt_channel_t en_a_gpt_channel,  uint32_t_ * ptr_uint32_a_rem_time)
 {
     en_gpt_status_t en_gpt_status_retval = GPT_OK;
     if(
             (en_a_gpt_channel >= GPT_CONFIGURED_TIMERS_CHS_COUNT) ||
-            (NULL_PTR != uint32_a_rem_time)
+            (NULL_PTR != ptr_uint32_a_rem_time)
             )
     {
         en_gpt_status_retval = GPT_INVALID_ARGS;
@@ -341,14 +368,23 @@ en_gpt_status_t gpt_get_remaining_time(en_gpt_channel_t en_a_gpt_channel,  uint3
             uint32_t_ uint32_l_rem = GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAV_REG_OFFSET);
 
             // update [out] return pointer
-            * uint32_a_rem_time = uint32_l_rem;
+            * ptr_uint32_a_rem_time = uint32_l_rem;
         }
     }
 
     return en_gpt_status_retval;
 }
 
-
+/**
+ * @brief                                           :   Sets callback function to a timer channel
+ *
+ * @param[in]   en_a_gpt_channel                    :   Timer channel
+ * @param[in]   ptr_vd_fun_vd_a_gpt_notification    :   Ptr to callback function to store
+ *
+ * @return      GPT_OK                              :   If Success
+ *              GPT_ERROR                           :   Failed
+ *              GPT_INVALID_ARGS                    :   Failed, Invalid Args Given
+ */
 en_gpt_status_t gpt_set_callback(en_gpt_channel_t en_a_gpt_channel, ptr_vd_fun_vd_t ptr_vd_fun_vd_a_gpt_notification)
 {
     en_gpt_status_t en_gpt_status_retval = GPT_OK;
@@ -370,7 +406,15 @@ en_gpt_status_t gpt_set_callback(en_gpt_channel_t en_a_gpt_channel, ptr_vd_fun_v
 }
 
 
-
+/**
+ * @brief                           :   enables timer channel notification (callback)
+ *
+ * @param       en_a_gpt_channel    :   Timer Channel
+ *
+ * @return      GPT_OK              :   If Success
+ *              GPT_ERROR           :   Failed
+ *              GPT_INVALID_ARGS    :   Failed, Invalid Args Given
+ */
 en_gpt_status_t gpt_enable_notification(en_gpt_channel_t en_a_gpt_channel)
 {
     en_gpt_status_t en_gpt_status_retval = GPT_OK;
@@ -448,11 +492,11 @@ en_gpt_status_t gpt_enable_notification(en_gpt_channel_t en_a_gpt_channel)
             }
             case CH_TOTAL:
             default:
-                en_gpt_status_retval = GPT_ERROR;
+                en_gpt_status_retval = GPT_INVALID_ARGS;
                 break;
         }
         // enable IRQ
-        if(en_gpt_status_retval != GPT_ERROR) __enable_irq();
+        if(en_gpt_status_retval != GPT_INVALID_ARGS) __enable_irq();
     }
     else
     {
@@ -461,6 +505,16 @@ en_gpt_status_t gpt_enable_notification(en_gpt_channel_t en_a_gpt_channel)
 
     return en_gpt_status_retval;
 }
+
+/**
+ * @brief                           :   disable timer channel notification (callback)
+ *
+ * @param       en_a_gpt_channel    :   Timer Channel
+ *
+ * @return      GPT_OK              :   If Success
+ *              GPT_ERROR           :   Failed
+ *              GPT_INVALID_ARGS    :   Failed, Invalid Args Given
+ */
 en_gpt_status_t gpt_disable_notification(en_gpt_channel_t en_a_gpt_channel)
 {
     en_gpt_status_t en_gpt_status_retval = GPT_OK;
