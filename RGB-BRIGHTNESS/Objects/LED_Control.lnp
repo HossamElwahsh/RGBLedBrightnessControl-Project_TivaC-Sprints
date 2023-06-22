@@ -2,6 +2,8 @@
 ".\objects\gpio_program.o"
 ".\objects\systick_program.o"
 ".\objects\systick_linking_config.o"
+".\objects\gpt_linking_cfg.o"
+".\objects\gpt_program.o"
 ".\objects\led_program.o"
 ".\objects\btn_program.o"
 ".\objects\app.o"

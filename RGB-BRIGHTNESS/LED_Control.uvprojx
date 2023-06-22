@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\APP;.\HAL\btn;.\HAL\led;.\LIB;.\MCAL\gpio;.\MCAL\systick</IncludePath>
+              <IncludePath>.\APP;.\HAL\btn;.\HAL\led;.\LIB;.\MCAL\gpio;.\MCAL\systick;.\MCAL\gpt</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -423,6 +423,31 @@
               <FileName>systick_linking_config.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\MCAL\systick\systick_linking_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>gpt_interface.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\MCAL\gpt\gpt_interface.h</FilePath>
+            </File>
+            <File>
+              <FileName>gpt_linking_cfg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\MCAL\gpt\gpt_linking_cfg.c</FilePath>
+            </File>
+            <File>
+              <FileName>gpt_linking_cfg.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\MCAL\gpt\gpt_linking_cfg.h</FilePath>
+            </File>
+            <File>
+              <FileName>gpt_private.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\MCAL\gpt\gpt_private.h</FilePath>
+            </File>
+            <File>
+              <FileName>gpt_program.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\MCAL\gpt\gpt_program.c</FilePath>
             </File>
           </Files>
         </Group>
