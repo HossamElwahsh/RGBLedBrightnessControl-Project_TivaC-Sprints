@@ -76,8 +76,6 @@ typedef struct gpt_config {
     en_gpt_channel_t        en_gpt_channel_id;
     en_gpt_channel_mode_t   en_gpt_channel_mode;
     en_gpt_int_enabled_t    en_gpt_int_enabled;
-//    uint32_t_               uint32_prescale_value;
-    ptr_vd_fun_vd_t         ptr_vd_fun_vd_gpt_notification;
 }st_gpt_config_t;
 
 en_gpt_status_t gpt_init(st_gpt_config_t * st_a_gpt_config_arr);

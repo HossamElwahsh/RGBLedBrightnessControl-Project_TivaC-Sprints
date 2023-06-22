@@ -18,7 +18,7 @@
 static boolean gl_gpt_initialized = FALSE;
 
 static uint32_t_ gpt_get_timer_base_address(en_gpt_channel_t en_a_gpt_channel);
-
+static ptr_vd_fun_vd_t gl_callbacks_array[CH_TOTAL] = {NULL_PTR};
 
 /**
  * @brief                           :   Initializes GPT timers
@@ -372,7 +372,7 @@ en_gpt_status_t gpt_set_callback(en_gpt_channel_t en_a_gpt_channel, ptr_vd_fun_v
     }
     else
     {
-        gl_st_gpt_lconfig_arr[en_a_gpt_channel].ptr_vd_fun_vd_gpt_notification = ptr_vd_fun_vd_a_gpt_notification;
+        gl_callbacks_array[en_a_gpt_channel] = ptr_vd_fun_vd_a_gpt_notification;
     }
 
     return en_gpt_status_retval;
@@ -581,181 +581,133 @@ static uint32_t_ gpt_get_timer_base_address(en_gpt_channel_t en_a_gpt_channel)
 // Timer-0 Handler
 void TIMER0A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 0) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_0].ptr_vd_fun_vd_gpt_notification)
-            )
+    if(NULL_PTR != gl_callbacks_array[CH_0])
     {
-        gl_st_gpt_lconfig_arr[CH_0].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_0]();
     }
 
     // clear interrupt flag
     // set bit to clear flag
     SET_BIT(GET_ADDRESS_FROM_OFFSET(TIMER_0_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-        // while(1){}
 }
 
 // Timer-1 Handler
 void TIMER1A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 1) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_1].ptr_vd_fun_vd_gpt_notification)
-            )
+    if((NULL_PTR != gl_callbacks_array[CH_1]))
     {
-        gl_st_gpt_lconfig_arr[CH_1].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_1]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(TIMER_1_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-	// while(1){}
 }
 
 // Timer-2 Handler
 void TIMER2A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 2) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_2].ptr_vd_fun_vd_gpt_notification)
-            )
+    if((NULL_PTR != gl_callbacks_array[CH_2]))
     {
-        gl_st_gpt_lconfig_arr[CH_2].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_2]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(TIMER_2_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-	// while(1){}
 }
 
 // Timer-3 Handler
 void TIMER3A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 3) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_3].ptr_vd_fun_vd_gpt_notification)
-            )
+    if(NULL_PTR != gl_callbacks_array[CH_3])
     {
-        gl_st_gpt_lconfig_arr[CH_3].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_3]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(TIMER_3_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-	// while(1){}
 }
 
 // Timer-4 Handler
 void TIMER4A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 4) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_4].ptr_vd_fun_vd_gpt_notification)
-            )
+    if(NULL_PTR != gl_callbacks_array[CH_4])
     {
-        gl_st_gpt_lconfig_arr[CH_4].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_4]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(TIMER_4_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-	// while(1){}
 }
 
 // Timer-5 Handler
 void TIMER5A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 5) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_5].ptr_vd_fun_vd_gpt_notification)
-            )
+    if(NULL_PTR != gl_callbacks_array[CH_5])
     {
-        gl_st_gpt_lconfig_arr[CH_5].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_5]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(TIMER_5_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-	// while(1){}
 }
 
 // Wide Timer-0 Handler
 void WTIMER0A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 6) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_6_W].ptr_vd_fun_vd_gpt_notification)
-            )
+    if(NULL_PTR != gl_callbacks_array[CH_6_W])
     {
-        gl_st_gpt_lconfig_arr[CH_6_W].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_6_W]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(WIDE_TIMER_0_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-    // while(1){}
 }
 
 // Wide Timer-1 Handler
 void WTIMER1A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 7) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_7_W].ptr_vd_fun_vd_gpt_notification)
-            )
+    if(NULL_PTR != gl_callbacks_array[CH_7_W])
     {
-        gl_st_gpt_lconfig_arr[CH_7_W].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_7_W]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(WIDE_TIMER_1_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-    // while(1){}
 }
 
 // Wide Timer-2 Handler
 void WTIMER2A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 8) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_8_W].ptr_vd_fun_vd_gpt_notification)
-            )
+    if(NULL_PTR != gl_callbacks_array[CH_8_W])
     {
-        gl_st_gpt_lconfig_arr[CH_8_W].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_8_W]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(WIDE_TIMER_2_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-    // while(1){}
 }
 
 // Wide Timer-3 Handler
 void WTIMER3A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 9) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_9_W].ptr_vd_fun_vd_gpt_notification)
-            )
+    if(NULL_PTR != gl_callbacks_array[CH_9_W])
     {
-        gl_st_gpt_lconfig_arr[CH_9_W].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_9_W]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(WIDE_TIMER_3_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-    // while(1){}
 }
 
 // Wide Timer-4 Handler
 void WTIMER4A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 10) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_10_W].ptr_vd_fun_vd_gpt_notification)
-            )
+    if(NULL_PTR != gl_callbacks_array[CH_10_W])
     {
-        gl_st_gpt_lconfig_arr[CH_10_W].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_10_W]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(WIDE_TIMER_4_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-    // while(1){}
 }
 
 // Wide Timer-5 Handler
 void WTIMER5A_Handler(void)
 {
-    if(
-            (GPT_CONFIGURED_TIMERS_CHS_COUNT > 11) &&
-            (NULL_PTR != gl_st_gpt_lconfig_arr[CH_11_W].ptr_vd_fun_vd_gpt_notification)
-            )
+    if(NULL_PTR != gl_callbacks_array[CH_11_W])
     {
-        gl_st_gpt_lconfig_arr[CH_11_W].ptr_vd_fun_vd_gpt_notification();
+        gl_callbacks_array[CH_11_W]();
     }
 
     SET_BIT(GET_ADDRESS_FROM_OFFSET(WIDE_TIMER_5_BASE_ADDR, GPTMICR_REG_OFFSET), GPTMICR_TATOCINT_BIT);
-    // while(1){}
 }
