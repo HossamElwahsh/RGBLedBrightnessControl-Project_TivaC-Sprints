@@ -3,7 +3,6 @@
 //
 
 #include "gpt_linking_cfg.h"
-#include "std.h"
 
 st_gpt_config_t gl_st_gpt_lconfig_arr[GPT_CONFIGURED_TIMERS_CHS_COUNT] = {
         {
