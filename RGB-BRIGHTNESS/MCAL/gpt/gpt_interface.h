@@ -17,8 +17,8 @@
 
 #define GPT_CONFIGURED_TIMERS_CHS_COUNT     3
 
-#define     MAX_PRESCALER_REG_TIMER     255
-#define     MAX_PRESCALER_WIDE_TIMER    65535
+#define     MAX_PRESCALER_REG_TIMER         255
+#define     MAX_PRESCALER_WIDE_TIMER        65535
 
 /* Typedefs
  * -------------------- */
@@ -89,7 +89,7 @@ en_gpt_status_t gpt_start(en_gpt_channel_t en_a_gpt_channel, uint32_t_ uint32_a_
 en_gpt_status_t gpt_stop(en_gpt_channel_t en_a_gpt_channel);
 
 en_gpt_status_t gpt_get_elapsed_time(en_gpt_channel_t en_a_gpt_channel, uint32_t_ * uint32_a_elapsed_time);
-void gpt_get_remaining_time(en_gpt_channel_t en_a_gpt_channel,  uint32_t_ * uint32_a_rem_time);
+en_gpt_status_t gpt_get_remaining_time(en_gpt_channel_t en_a_gpt_channel,  uint32_t_ * uint32_a_rem_time);
 
 en_gpt_status_t gpt_set_callback(en_gpt_channel_t en_a_gpt_channel, ptr_vd_fun_vd_t ptr_vd_fun_vd_a_gpt_notification);
 

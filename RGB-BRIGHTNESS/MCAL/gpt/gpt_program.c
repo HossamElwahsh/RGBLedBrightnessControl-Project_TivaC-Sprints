@@ -295,6 +295,69 @@ en_gpt_status_t gpt_stop(en_gpt_channel_t en_a_gpt_channel)
     return en_gpt_status_retval;
 }
 
+
+en_gpt_status_t gpt_get_elapsed_time(en_gpt_channel_t en_a_gpt_channel, uint32_t_ * uint32_a_elapsed_time)
+{
+    en_gpt_status_t en_gpt_status_retval = GPT_OK;
+    if(
+            (en_a_gpt_channel >= GPT_CONFIGURED_TIMERS_CHS_COUNT) ||
+            (NULL_PTR != uint32_a_elapsed_time)
+            )
+    {
+        en_gpt_status_retval = GPT_INVALID_ARGS;
+    }
+    else
+    {
+        uint32_t_ uint32_l_base_address = gpt_get_timer_base_address(en_a_gpt_channel);
+        if(0 == uint32_l_base_address)
+        {
+            en_gpt_status_retval = GPT_ERROR;
+        }
+        else
+        {
+            uint32_t_ uint32_l_elapsed =
+                    GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAILR_REG_OFFSET) -
+                    GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAV_REG_OFFSET);
+
+            // update [out] return pointer
+            *uint32_a_elapsed_time = uint32_l_elapsed;
+        }
+    }
+
+    return en_gpt_status_retval;
+}
+
+en_gpt_status_t gpt_get_remaining_time(en_gpt_channel_t en_a_gpt_channel,  uint32_t_ * uint32_a_rem_time)
+{
+    en_gpt_status_t en_gpt_status_retval = GPT_OK;
+    if(
+            (en_a_gpt_channel >= GPT_CONFIGURED_TIMERS_CHS_COUNT) ||
+            (NULL_PTR != uint32_a_rem_time)
+            )
+    {
+        en_gpt_status_retval = GPT_INVALID_ARGS;
+    }
+    else
+    {
+        uint32_t_ uint32_l_base_address = gpt_get_timer_base_address(en_a_gpt_channel);
+        if(0 == uint32_l_base_address)
+        {
+            en_gpt_status_retval = GPT_ERROR;
+        }
+        else
+        {
+            // get remaining time from TAV register (Timer A Value Register)
+            uint32_t_ uint32_l_rem = GET_ADDRESS_FROM_OFFSET(uint32_l_base_address, GPTMTAV_REG_OFFSET);
+
+            // update [out] return pointer
+            * uint32_a_rem_time = uint32_l_rem;
+        }
+    }
+
+    return en_gpt_status_retval;
+}
+
+
 en_gpt_status_t gpt_set_callback(en_gpt_channel_t en_a_gpt_channel, ptr_vd_fun_vd_t ptr_vd_fun_vd_a_gpt_notification)
 {
     en_gpt_status_t en_gpt_status_retval = GPT_OK;
