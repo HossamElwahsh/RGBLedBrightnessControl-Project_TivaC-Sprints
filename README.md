@@ -9,9 +9,9 @@
 > Develop the Timer Driver and use it to control the RGB LED brightness on the Tiva-C board based on the push button press.
 
 ## Quick Links
-- `Video` 👉 [Youtube]()
-- `Project Hex` 👉 []()
-- `Documentation` 👉 [Google Docs](https://docs.google.com/document/d/1G7hjrKdbhdpVfhLmX3FCOfq5wveIrZisSxEtebcybI0/edit?usp=sharing) 👉 [PDF]()
+- `Video` 👉 Youtube - uploading
+- `Project Hex` 👉 [LED_Control.hex](RGB-BRIGHTNESS/Objects/LED_Control.hex)
+- `Documentation` 👉 [Google Docs](https://docs.google.com/document/d/1G7hjrKdbhdpVfhLmX3FCOfq5wveIrZisSxEtebcybI0/edit?usp=sharing) 👉 [PDF](Documents/ARM%20RGB%20LED%20Brightness%20Control%20-%20Documentation.pdf)
 - `Team Backlog / Test Protocol` 👉 [Google Sheets](https://docs.google.com/spreadsheets/d/1GbQpRRLHq_ikWl7TjrVWzOoL4nGz3XgLzbhVqFADxBA/edit?usp=sharing) 👉 [Excel](Documents/ARM%20RGB%20LED%20Brightness%20Control%20-%20Backlog%20and%20test%20protocol.xlsx) 
 
 ----
