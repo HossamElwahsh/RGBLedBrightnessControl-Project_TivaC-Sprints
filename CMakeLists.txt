@@ -8,6 +8,7 @@ include_directories(RGB-BRIGHTNESS/APP)
 include_directories(RGB-BRIGHTNESS/HAL)
 include_directories(RGB-BRIGHTNESS/HAL/led)
 include_directories(RGB-BRIGHTNESS/HAL/btn)
+include_directories(RGB-BRIGHTNESS/HAL/pwm)
 include_directories(RGB-BRIGHTNESS/LIB)
 include_directories(RGB-BRIGHTNESS/MCAL)
 include_directories(RGB-BRIGHTNESS/MCAL/gpio)
@@ -36,4 +37,5 @@ add_executable(shared
         RGB-BRIGHTNESS/MCAL/systick/systick_program.c
         RGB-BRIGHTNESS/HAL/btn/btn_program.c RGB-BRIGHTNESS/MCAL/systick/systick_linking_config.c
 
-        RGB-BRIGHTNESS/MCAL/systick/systick_linking_config.h RGB-BRIGHTNESS/MCAL/gpt/gpt_program.c RGB-BRIGHTNESS/MCAL/gpt/gpt_interface.h RGB-BRIGHTNESS/MCAL/gpt/gpt_private.h RGB-BRIGHTNESS/MCAL/gpt/gpt_linking_cfg.c RGB-BRIGHTNESS/MCAL/gpt/gpt_linking_cfg.h)
+        RGB-BRIGHTNESS/MCAL/systick/systick_linking_config.h RGB-BRIGHTNESS/MCAL/gpt/gpt_program.c RGB-BRIGHTNESS/MCAL/gpt/gpt_interface.h
+        RGB-BRIGHTNESS/MCAL/gpt/gpt_private.h RGB-BRIGHTNESS/MCAL/gpt/gpt_linking_cfg.c RGB-BRIGHTNESS/MCAL/gpt/gpt_linking_cfg.h RGB-BRIGHTNESS/HAL/pwm/pwm_program.c)

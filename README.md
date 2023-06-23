@@ -10,9 +10,9 @@
 
 ## Quick Links
 - `Video` 👉 [Youtube]()
-- `Project Hex` 👉 [LED_Control.hex]()
+- `Project Hex` 👉 []()
 - `Documentation` 👉 [Google Docs](https://docs.google.com/document/d/1G7hjrKdbhdpVfhLmX3FCOfq5wveIrZisSxEtebcybI0/edit?usp=sharing) 👉 [PDF]()
-- `Team Backlog / Test Protocol` 👉 [Google Sheets](https://docs.google.com/spreadsheets/d/1GbQpRRLHq_ikWl7TjrVWzOoL4nGz3XgLzbhVqFADxBA/edit?usp=sharing) 👉 [Excel]() 
+- `Team Backlog / Test Protocol` 👉 [Google Sheets](https://docs.google.com/spreadsheets/d/1GbQpRRLHq_ikWl7TjrVWzOoL4nGz3XgLzbhVqFADxBA/edit?usp=sharing) 👉 [Excel](Documents/ARM%20RGB%20LED%20Brightness%20Control%20-%20Backlog%20and%20test%20protocol.xlsx) 
 
 ----
 ## Requirements
@@ -37,3 +37,4 @@
 ### Implement your drivers
 - Implement the General Purpose Timer (GPT) driver
   - GPT Driver shall support APIs like:( Initialization, starting a timer in microseconds,  milliseconds, and seconds, stopping the timer, getting elapsed time, getting remaining time, enabling interrupts, disable interrupts, and a callback.)
+- Implement PWM Driver
