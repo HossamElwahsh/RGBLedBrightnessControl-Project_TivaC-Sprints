@@ -42,7 +42,7 @@ typedef enum
 typedef struct
 {
 	en_pwm_channel_state_t channel_state;
-	en_pwm_signal_state_t  signel_state	;
+	en_pwm_signal_state_t  signal_state	;
 	uint16_t_			   on_time		;
 	uint16_t_  			   off_time		;
 }st_signal_state_t;
@@ -87,7 +87,7 @@ en_pwm_error_t pwm_init(void)
 				st_lo_pwm_pin.port = (en_gpio_port_t)(arr_gl_st_signal_cfg[u8_lo_channel_iterator].pins_per_channel[u8_lo_pin_iterator].port);
 				st_lo_pwm_pin.pin  = (en_gpio_pin_t)(arr_gl_st_signal_cfg[u8_lo_channel_iterator].pins_per_channel[u8_lo_pin_iterator].pin) ;
 				st_lo_pwm_pin.pin_cfg = OUTPUT;
-				st_lo_pwm_pin.current = PIN_CURRENT_8MA;
+				st_lo_pwm_pin.current = PIN_CURRENT_2MA;
 				
 				en_lo_error_state = (en_pwm_error_t)gpio_pin_init(&st_lo_pwm_pin);
 
@@ -158,9 +158,8 @@ en_pwm_error_t pwm_start(en_pwm_channel_id_t en_a_channel_id)
 		if (ZERO == arr_gl_st_signal_state[en_a_channel_id].on_time)
 		{
 			/* Set all pins on the channel to low */
-
 		}
-		else if ((ZERO == arr_gl_st_signal_state[en_a_channel_id].off_time) && (ZERO != arr_gl_st_signal_state[en_a_channel_id].on_time))
+		else
 		{
 			/* Set all pins on the channel to high */
 			for (u8_lo_pin_iterator = ZERO; u8_lo_pin_iterator < PWM_MAX_PINS_PER_CHANNEL; u8_lo_pin_iterator++)
@@ -171,10 +170,8 @@ en_pwm_error_t pwm_start(en_pwm_channel_id_t en_a_channel_id)
 
 				st_lo_pwm_pin.port = (en_gpio_port_t)(arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].port);
 				st_lo_pwm_pin.pin = (en_gpio_pin_t)(arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].pin);
-				st_lo_pwm_pin.pin_cfg = OUTPUT;
-				st_lo_pwm_pin.current = PIN_CURRENT_8MA;
 
-				en_lo_error_state = (en_pwm_error_t)gpio_pin_init(&st_lo_pwm_pin);
+				en_lo_error_state = (en_pwm_error_t)gpio_setPinVal(st_lo_pwm_pin.port, st_lo_pwm_pin.pin, HIGH);
 
 				if (PWM_OK != en_lo_error_state)
 				{
@@ -182,11 +179,17 @@ en_pwm_error_t pwm_start(en_pwm_channel_id_t en_a_channel_id)
 					break;
 				}
 			}
-		}
-		else
-		{
-			gpt_set_callback(PWM_GPT_CHANNEL, pwm_timer_cbf);
-			en_lo_error_state = (en_pwm_error_t)gpt_start(PWM_GPT_CHANNEL, arr_gl_st_signal_state[en_a_channel_id].on_time, TIME_IN_MS);
+			arr_gl_st_signal_state[en_gl_active_channel_index].signal_state = SIGNAL_ON;
+			
+			if ((ZERO == arr_gl_st_signal_state[en_a_channel_id].off_time) && (ZERO != arr_gl_st_signal_state[en_a_channel_id].on_time))
+			{
+				/* Do Nothing */
+			}
+			else
+			{
+				gpt_set_callback(PWM_GPT_CHANNEL, pwm_timer_cbf);
+				en_lo_error_state = (en_pwm_error_t)gpt_start(PWM_GPT_CHANNEL, arr_gl_st_signal_state[en_a_channel_id].on_time, TIME_IN_MS);
+			}
 		}
 	}
 	else
@@ -251,25 +254,27 @@ static void pwm_timer_cbf(void)
 	uint32_t_ u32_lo_delay;
 	
 	/* set the pin level and interval duration according to signal state */
-	if (arr_gl_st_signal_state[en_gl_active_channel_index].signel_state == SIGNAL_ON)
+	if (arr_gl_st_signal_state[en_gl_active_channel_index].signal_state == SIGNAL_ON)
 	{
 		en_lo_pwm_pin_level = LOW;
 		u32_lo_delay = arr_gl_st_signal_state[en_gl_active_channel_index].off_time;
+		arr_gl_st_signal_state[en_gl_active_channel_index].signal_state = SIGNAL_OFF;
 	}
 	else
 	{
 		en_lo_pwm_pin_level = HIGH;
 		u32_lo_delay = arr_gl_st_signal_state[en_gl_active_channel_index].on_time;
+		arr_gl_st_signal_state[en_gl_active_channel_index].signal_state = SIGNAL_ON;
 	}
 
 	/* Stop the timer */
 	gpt_stop(PWM_GPT_CHANNEL);
 
 	/* Set all the channel pins to the right level */
-	for (u8_lo_pin_index = 0; u8_lo_pin_index < PWM_CHANNEL_TOTAL; u8_lo_pin_index++)
+	for (u8_lo_pin_index = 0; u8_lo_pin_index < PWM_MAX_PINS_PER_CHANNEL; u8_lo_pin_index++)
 	{
-		gpio_setPinVal((en_gpio_port_t)(arr_gl_st_signal_cfg[u8_lo_pin_index].pins_per_channel[en_gl_active_channel_index].port),
-					   (en_gpio_pin_t)(arr_gl_st_signal_cfg[u8_lo_pin_index].pins_per_channel[en_gl_active_channel_index].pin),
+		gpio_setPinVal((en_gpio_port_t)(arr_gl_st_signal_cfg[en_gl_active_channel_index].pins_per_channel[u8_lo_pin_index].port),
+					   (en_gpio_pin_t)(arr_gl_st_signal_cfg[en_gl_active_channel_index].pins_per_channel[u8_lo_pin_index].pin),
 					   en_lo_pwm_pin_level);
 	}
 

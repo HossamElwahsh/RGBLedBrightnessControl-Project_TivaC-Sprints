@@ -131,9 +131,6 @@ en_btn_status_code_t_ btn_read(st_btn_config_t_* ptr_st_btn_config, en_btn_state
 		{
 			if(BTN_ACTIVATED == ptr_st_btn_config->en_btn_activation)
 			{
-				/* Change the button state (for debouncing) */
-				en_gl_read_state = BTN_READ_BUSY;
-				
 				/* get the value on the button pin */
 				gpio_getPinVal((en_gpio_port_t) ptr_st_btn_config->en_btn_port,
 											(en_gpio_pin_t)  ptr_st_btn_config->en_btn_pin ,
@@ -163,6 +160,8 @@ en_btn_status_code_t_ btn_read(st_btn_config_t_* ptr_st_btn_config, en_btn_state
 				
 				if(BTN_STATE_PRESSED == *ptr_en_btn_state)
 				{
+					/* Change the button state (for debouncing) */
+					en_gl_read_state = BTN_READ_BUSY;
 					//systick_ms_delay(BTN_DEBOUNCE_DELAY);
 					gpt_enable_notification(BTN_GPT_CHANNEL);
 					gpt_set_callback(BTN_GPT_CHANNEL, debounce_cbf);

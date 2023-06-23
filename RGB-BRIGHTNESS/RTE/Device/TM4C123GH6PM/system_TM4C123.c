@@ -597,10 +597,10 @@ void SystemInit (void)
 
     SYSCTL->RCC  = (RCC_Val  | (1<<11));                            /* set value with BYPASS */
 
-    if ( (((RCC_Val  & (1UL<<13)) == 0) && ((RCC2_Val & (1UL<<31)) == 0)) ||
-         (((RCC2_Val & (1UL<<13)) == 0) && ((RCC2_Val & (1UL<<31)) != 0))   ) {
-      while ((SYSCTL->RIS & (1UL<<6)) != (1UL<<6));                 /* wait until PLL is locked */
-    }
+   if ( (((RCC_Val  & (1UL<<13)) == 0) && ((RCC2_Val & (1UL<<31)) == 0)) ||
+        (((RCC2_Val & (1UL<<13)) == 0) && ((RCC2_Val & (1UL<<31)) != 0))   ) {
+     while ((SYSCTL->RIS & (1UL<<6)) != (1UL<<6));                 /* wait until PLL is locked */
+   }
 
     SYSCTL->RCC  = (RCC_Val);                                       /* set value */
     SYSCTL->RCC2 = (RCC2_Val);                                      /* set value */

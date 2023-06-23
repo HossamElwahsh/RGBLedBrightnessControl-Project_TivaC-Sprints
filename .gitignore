@@ -448,4 +448,4 @@ cmake-build-debug/
 
 *.workspace
 
-/LED-V1.0/Objects/
+/RGBLedBrightnessControl/Objects/

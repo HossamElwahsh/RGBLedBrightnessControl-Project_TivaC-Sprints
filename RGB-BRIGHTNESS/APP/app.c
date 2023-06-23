@@ -90,13 +90,13 @@ en_app_error_t app_init(void)
 {
     en_app_error_t en_app_error_retval = APP_OK;
     en_btn_status_code_t_ en_btn_status_code = BTN_STATUS_OK;
-    //en_led_error_t_ en_led_error = LED_OK;
+    en_led_error_t_ en_led_error = LED_OK;
 
-    ///* init RGB LEDS */
-    //for (int i = ZERO; i < RGB_LEDS_COUNT; ++i) {
-    //    en_led_error = led_init(gl_st_app_leds[i].en_led_port, gl_st_app_leds[i].en_led_pin);
-    //    if(LED_OK != en_led_error) en_app_error_retval = APP_FAIL;
-    //}
+    /* init RGB LEDS */
+    for (int i = ZERO; i < RGB_LEDS_COUNT; ++i) {
+        en_led_error = led_init(gl_st_app_leds[i].en_led_port, gl_st_app_leds[i].en_led_pin);
+        if(LED_OK != en_led_error) en_app_error_retval = APP_FAIL;
+    }
 
     // init button
     en_btn_status_code = btn_init(&gl_st_user_btn_cfg);
