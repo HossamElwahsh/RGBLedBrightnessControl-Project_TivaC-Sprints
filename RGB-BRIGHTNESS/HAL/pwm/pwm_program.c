@@ -84,8 +84,8 @@ en_pwm_error_t pwm_init(void)
 			{
 				st_gpio_cfg_t st_lo_pwm_pin;
 				
-				st_lo_pwm_pin.port = arr_gl_st_signal_cfg[u8_lo_channel_iterator].pins_per_channel[u8_lo_pin_iterator].port;
-				st_lo_pwm_pin.pin  = arr_gl_st_signal_cfg[u8_lo_channel_iterator].pins_per_channel[u8_lo_pin_iterator].pin ;
+				st_lo_pwm_pin.port = (en_gpio_port_t)(arr_gl_st_signal_cfg[u8_lo_channel_iterator].pins_per_channel[u8_lo_pin_iterator].port);
+				st_lo_pwm_pin.pin  = (en_gpio_pin_t)(arr_gl_st_signal_cfg[u8_lo_channel_iterator].pins_per_channel[u8_lo_pin_iterator].pin) ;
 				st_lo_pwm_pin.pin_cfg = OUTPUT;
 				st_lo_pwm_pin.current = PIN_CURRENT_8MA;
 				
@@ -118,13 +118,13 @@ en_pwm_error_t pwm_init(void)
  */
 en_pwm_error_t pwm_adjust_signal(en_pwm_channel_id_t en_a_channel_id, uint8_t_ u8_a_dutyCycle, uint16_t_ u16_a_msPeriod)
 {
-	uint16_t_ u16_lo_onTime, u16_lo_offTime;
+	//uint16_t_ u16_lo_onTime, u16_lo_offTime;
 	en_pwm_error_t en_lo_error_state = PWM_OK;
 	
 	if(u8_a_dutyCycle <= PWM_MAX_DUTY_CYCLE)
 	{
-		arr_gl_st_signal_state[en_a_channel_id].on_time = (uint16_t_)(((f32_t_)u8_a_dutyCycle / 100.0) * u16_a_msPeriod);
-		arr_gl_st_signal_state[en_a_channel_id].off_time = (uint16_t_)(((f32_t_)(100-u8_a_dutyCycle) / 100.0) * u16_a_msPeriod);
+		arr_gl_st_signal_state[en_a_channel_id].on_time = (uint16_t_)((u8_a_dutyCycle / 100.0) * u16_a_msPeriod);
+		arr_gl_st_signal_state[en_a_channel_id].off_time = (uint16_t_)(((100-u8_a_dutyCycle) / 100.0) * u16_a_msPeriod);
 	}
 	else
 	{
@@ -169,8 +169,8 @@ en_pwm_error_t pwm_start(en_pwm_channel_id_t en_a_channel_id)
 
 				//if (NULL == arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].port) continue;
 
-				st_lo_pwm_pin.port = (en_pwm_port_t)(arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].port);
-				st_lo_pwm_pin.pin = (en_pwm_pin_t)(arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].pin);
+				st_lo_pwm_pin.port = (en_gpio_port_t)(arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].port);
+				st_lo_pwm_pin.pin = (en_gpio_pin_t)(arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].pin);
 				st_lo_pwm_pin.pin_cfg = OUTPUT;
 				st_lo_pwm_pin.current = PIN_CURRENT_8MA;
 
@@ -268,8 +268,8 @@ static void pwm_timer_cbf(void)
 	/* Set all the channel pins to the right level */
 	for (u8_lo_pin_index = 0; u8_lo_pin_index < PWM_CHANNEL_TOTAL; u8_lo_pin_index++)
 	{
-		gpio_setPinVal(arr_gl_st_signal_cfg[u8_lo_pin_index].pins_per_channel[en_gl_active_channel_index].port,
-					   arr_gl_st_signal_cfg[u8_lo_pin_index].pins_per_channel[en_gl_active_channel_index].pin,
+		gpio_setPinVal((en_gpio_port_t)(arr_gl_st_signal_cfg[u8_lo_pin_index].pins_per_channel[en_gl_active_channel_index].port),
+					   (en_gpio_pin_t)(arr_gl_st_signal_cfg[u8_lo_pin_index].pins_per_channel[en_gl_active_channel_index].pin),
 					   en_lo_pwm_pin_level);
 	}
 
