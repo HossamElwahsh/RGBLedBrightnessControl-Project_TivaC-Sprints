@@ -13,10 +13,7 @@
 #include "app.h"
 #include "led_interface.h"
 #include "btn_interface.h"
-#include "systick_interface.h"
-#include "systick_linking_config.h"
-#include "gpt_interface.h"
-#include "gpt_linking_cfg.h"
+#include "pwm_interface.h"
 
 /*
  * Private Typedefs */
@@ -55,10 +52,6 @@ typedef enum{
 #define USER_BTN_PORT		BTN_PORT_F // Port F
 #define USER_BTN_PIN		BTN_PIN_4
 
-/* GPT Timers */
-#define TIME_ON_DELAY_TIMER  CH_0
-#define TIMER_ON_TIMER       CH_1
-#define TOTAL_PERIOD_TIMER   CH_2
 
 typedef struct{
     en_led_port_t_ en_led_port;
@@ -86,9 +79,6 @@ static st_btn_config_t_ gl_st_user_btn_cfg = {
 };
 
 static void app_next_state(void);
-static void app_gpt_time_on_cb(void);
-static void app_gpt_time_total_cb(void);
-static void app_gpt_time_delay_before_on_cb(void);
 
 /**
  * @brief                      : Initializes the required modules by the app
@@ -100,43 +90,22 @@ en_app_error_t app_init(void)
 {
     en_app_error_t en_app_error_retval = APP_OK;
     en_btn_status_code_t_ en_btn_status_code = BTN_STATUS_OK;
-    en_led_error_t_ en_led_error = LED_OK;
-    en_systick_error_t en_systick_error = ST_OK;
+    //en_led_error_t_ en_led_error = LED_OK;
 
-    /* init RGB LEDS */
-    for (int i = ZERO; i < RGB_LEDS_COUNT; ++i) {
-        en_led_error = led_init(gl_st_app_leds[i].en_led_port, gl_st_app_leds[i].en_led_pin);
-        if(LED_OK != en_led_error) en_app_error_retval = APP_FAIL;
-    }
+    ///* init RGB LEDS */
+    //for (int i = ZERO; i < RGB_LEDS_COUNT; ++i) {
+    //    en_led_error = led_init(gl_st_app_leds[i].en_led_port, gl_st_app_leds[i].en_led_pin);
+    //    if(LED_OK != en_led_error) en_app_error_retval = APP_FAIL;
+    //}
 
     // init button
     en_btn_status_code = btn_init(&gl_st_user_btn_cfg);
     if(BTN_STATUS_OK != en_btn_status_code) en_app_error_retval = APP_FAIL;
 
-    // Init Systick
-    en_systick_error = systick_init(&gl_st_systick_cfg_0);
-    if(ST_OK != en_systick_error) en_app_error_retval = APP_FAIL;
+    /* Init PWM module */
+    en_pwm_error_t en_pwm_status = pwm_init();
+    if(PWM_OK != en_pwm_status) en_app_error_retval = APP_FAIL;
 
-
-    /*
-     *  TIME_ON_DELAY_TIMER     CH_0
-     *  TIMER_ON_TIMER          CH_1
-     *  TOTAL_PERIOD_TIMER      CH_2
-     */
-
-    /* Init timers */
-    en_gpt_status_t en_gpt_status = gpt_init();
-    if(GPT_OK != en_gpt_status) en_app_error_retval = APP_FAIL;
-
-    // set timers callbacks
-    en_gpt_status = gpt_set_callback(TIME_ON_DELAY_TIMER, app_gpt_time_delay_before_on_cb);
-    if(GPT_OK != en_gpt_status) en_app_error_retval = APP_FAIL;
-
-    en_gpt_status = gpt_set_callback(TIMER_ON_TIMER, app_gpt_time_on_cb);
-    if(GPT_OK != en_gpt_status) en_app_error_retval = APP_FAIL;
-
-    en_gpt_status = gpt_set_callback(TOTAL_PERIOD_TIMER, app_gpt_time_total_cb);
-    if(GPT_OK != en_gpt_status) en_app_error_retval = APP_FAIL;
 
     return en_app_error_retval;
 }
@@ -169,21 +138,8 @@ void app_start(void)
                     break;
             }
 
-           /* if(gl_en_app_sub_state == SUB_STATE_1_DUTY_IN_PERCENT)
-            {
-                gl_en_app_sub_state = SUB_STATE_2_DUTY_IN_PERCENT;
-                continue;
-            }
-            else if(gl_en_app_sub_state == SUB_STATE_2_DUTY_IN_PERCENT)
-            {
-                gl_en_app_sub_state = SUB_STATE_3_DUTY_IN_PERCENT;
-                continue;
-            }
-            else
-            {
-                gl_en_app_sub_state = SUB_STATE_1_DUTY_IN_PERCENT;
-                continue;
-            }*/
+            
+
         }
         else
         {
@@ -204,19 +160,19 @@ void app_start(void)
                 gl_en_app_state = RUNNING;
                 break;
             }
-            case STARTED:
-            {
-                // initial start delay finished
-                // turn off LED, start time on delay timer for every upcoming period
-
-                led_off(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
-                gpt_start(TIMER_ON_TIMER,
-                          (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION),
-                          TIME_IN_MS);
-
-                gl_en_app_state = RUNNING;
-                break;
-            }
+//            case STARTED:
+//            {
+//                // initial start delay finished
+//                // turn off LED, start time on delay timer for every upcoming period
+//
+//                led_off(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
+//                gpt_start(TIMER_ON_TIMER,
+//                          (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION),
+//                          TIME_IN_MS);
+//
+//                gl_en_app_state = RUNNING;
+//                break;
+//            }
             case STATES_TOTAL:
             default:
             {
@@ -232,9 +188,7 @@ void app_start(void)
 static void app_next_state(void)
 {
     // stop timers
-    gpt_stop(TIMER_ON_TIMER);
-    gpt_stop(TIME_ON_DELAY_TIMER);
-    gpt_stop(TOTAL_PERIOD_TIMER);
+    pwm_stop((en_pwm_channel_id_t)gl_u8_current_led_idx);
 
     // turn off previous color led
     led_off(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
@@ -243,51 +197,8 @@ static void app_next_state(void)
     gl_u8_current_led_idx = INC_WITH_MOD(gl_u8_current_led_idx, RGB_LEDS_COUNT);
 
     // turn on next state color
-    led_on(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
+    //led_on(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
 
-
-    if(SUB_STATE_1_DUTY_IN_PERCENT == gl_en_app_sub_state)
-    {
-        gpt_start(TIME_ON_DELAY_TIMER,
-                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * GET_PERCENTAGE(SUB_STATE_1_DUTY_IN_PERCENT)),
-                  TIME_IN_MS);
-    }
-    else if(SUB_STATE_2_DUTY_IN_PERCENT == gl_en_app_sub_state)
-    {
-        gpt_start(TIME_ON_DELAY_TIMER,
-                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * GET_PERCENTAGE(SUB_STATE_2_DUTY_IN_PERCENT)),
-                  TIME_IN_MS);
-    }
-    else if(SUB_STATE_3_DUTY_IN_PERCENT == gl_en_app_sub_state)
-    {
-        gpt_start(TIME_ON_DELAY_TIMER,
-                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * GET_PERCENTAGE(SUB_STATE_3_DUTY_IN_PERCENT)),
-                  TIME_IN_MS);
-    }
-    else // bad state - reset
-    {
-        gl_en_app_sub_state = SUB_STATE_1_DUTY_IN_PERCENT;
-        gpt_start(TIME_ON_DELAY_TIMER,
-                  (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION * GET_PERCENTAGE(SUB_STATE_1_DUTY_IN_PERCENT)),
-                  TIME_IN_MS);
-    }
-
-    // start total period timer
-    gpt_start(TOTAL_PERIOD_TIMER,
-              (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION),
-              TIME_IN_MS);
-}
-
-
-static void app_gpt_time_on_cb(void)
-{
-    led_off(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
-}
-static void app_gpt_time_total_cb(void)
-{
-    led_on(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
-}
-static void app_gpt_time_delay_before_on_cb(void)
-{
-    gl_en_app_state = STARTED;
+		pwm_adjust_signal((en_pwm_channel_id_t)gl_u8_current_led_idx, gl_en_app_sub_state, LED_BLINK_TOT_MS_PERIOD_DURATION);
+    pwm_start((en_pwm_channel_id_t)gl_u8_current_led_idx);
 }
