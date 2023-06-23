@@ -65,7 +65,8 @@ typedef enum
 	BTN_STATUS_OK = 0			 ,
 	BTN_STATUS_INVALID_PULL_TYPE ,
 	BTN_STATUS_INVALID_STATE	 ,
-	BTN_STATUS_DEACTIVATED
+	BTN_STATUS_DEACTIVATED			,
+	BTN_STATUS_BUSY
 }en_btn_status_code_t_;
 
 /*----------------------------------------------------------/
