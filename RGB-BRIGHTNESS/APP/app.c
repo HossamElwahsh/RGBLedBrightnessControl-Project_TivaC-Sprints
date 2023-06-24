@@ -18,6 +18,7 @@
 /*
  * Private Typedefs */
 typedef enum{
+		SUB_STATE_0_DUTY_IN_PERCENT =  0 ,
     SUB_STATE_1_DUTY_IN_PERCENT = 30 ,
     SUB_STATE_2_DUTY_IN_PERCENT = 60 ,
     SUB_STATE_3_DUTY_IN_PERCENT = 90 ,
@@ -67,7 +68,7 @@ static st_app_led_t gl_st_app_leds[RGB_LEDS_COUNT] =
 
 /*
  * Private Variables */
-static en_app_state_t gl_en_app_state = SWITCHING;
+static en_app_state_t gl_en_app_state = RUNNING;
 static en_app_sub_state_t gl_en_app_sub_state = SUB_STATE_1_DUTY_IN_PERCENT;
 static uint8_t_ gl_u8_current_led_idx = RGB_LED_GREEN_INDEX;
 
@@ -123,6 +124,10 @@ void app_start(void)
             gl_en_app_state = SWITCHING;
 
             switch (gl_en_app_sub_state) {
+								case SUB_STATE_0_DUTY_IN_PERCENT:
+									  gl_en_app_sub_state = SUB_STATE_1_DUTY_IN_PERCENT;
+										break;
+							
                 case SUB_STATE_1_DUTY_IN_PERCENT:
                     gl_en_app_sub_state = SUB_STATE_2_DUTY_IN_PERCENT;
                     break;
@@ -134,12 +139,9 @@ void app_start(void)
                 case SUB_STATE_3_DUTY_IN_PERCENT:
                 case SUB_STATES_TOTAL:
                 default:
-                    gl_en_app_sub_state = SUB_STATE_1_DUTY_IN_PERCENT;
+                    gl_en_app_sub_state = SUB_STATE_0_DUTY_IN_PERCENT;
                     break;
             }
-
-            
-
         }
         else
         {
@@ -160,19 +162,6 @@ void app_start(void)
                 gl_en_app_state = RUNNING;
                 break;
             }
-//            case STARTED:
-//            {
-//                // initial start delay finished
-//                // turn off LED, start time on delay timer for every upcoming period
-//
-//                led_off(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
-//                gpt_start(TIMER_ON_TIMER,
-//                          (uint32_t_)(LED_BLINK_TOT_MS_PERIOD_DURATION),
-//                          TIME_IN_MS);
-//
-//                gl_en_app_state = RUNNING;
-//                break;
-//            }
             case STATES_TOTAL:
             default:
             {
