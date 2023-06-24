@@ -11,14 +11,33 @@
 #include "systick_interface.h"
 #include "systick_linking_config.h"
 #include "gpio_interface.h"
+#include "gpt_interface.h"
 
 #include "btn_interface.h"
+
+
 
 /*---------------------------------------------------------/
 /- LOCAL MACROS
 /---------------------------------------------------------*/
 #define BTN_DEBOUNCE_DELAY			200 //in ms
+#define BTN_GPT_CHANNEL					CH_1
 
+/*---------------------------------------------------------/
+/- ENUMS
+/---------------------------------------------------------*/
+typedef enum
+{
+	BTN_READ_BUSY = 0 ,
+	BTN_READ_IDLE
+}en_btn_read_state_t;
+
+/*---------------------------------------------------------/
+/- GLOBAL VARIABLES 
+/---------------------------------------------------------*/
+static en_btn_read_state_t en_gl_read_state = BTN_READ_IDLE;
+
+static void debounce_cbf(void);
 /*---------------------------------------------------------/
 /- FUNCTION IMPLEMENTATION
 /---------------------------------------------------------*/
@@ -56,7 +75,8 @@ en_btn_status_code_t_ btn_init(st_btn_config_t_* ptr_st_btn_config)
 		/* Initialize the button pin */
 		gpio_pin_init(&btn_pin_cfg);
 		
-		systick_init(&gl_st_systick_cfg_0);
+		//systick_init(&gl_st_systick_cfg_0);
+		gpt_init();
 		
 		/* Set the button state */
 		ptr_st_btn_config->en_btn_activation = BTN_ACTIVATED;
@@ -103,48 +123,68 @@ en_btn_status_code_t_ btn_read(st_btn_config_t_* ptr_st_btn_config, en_btn_state
 {
 	en_btn_status_code_t_ lo_en_btn_status = BTN_STATUS_OK;
 	en_gpio_pin_level_t lo_en_btn_val;
-
-	if((ptr_st_btn_config != NULL_PTR) && (ptr_en_btn_state != NULL_PTR))
-	{
-		if(BTN_ACTIVATED == ptr_st_btn_config->en_btn_activation)
-		{
-			gpio_getPinVal((en_gpio_port_t) ptr_st_btn_config->en_btn_port,
-										(en_gpio_pin_t)  ptr_st_btn_config->en_btn_pin ,
-											&lo_en_btn_val);
 	
-			switch (ptr_st_btn_config->en_btn_pull_type)
+	if(BTN_READ_IDLE == en_gl_read_state)
+	{
+		/* Validate input parameters */
+		if((ptr_st_btn_config != NULL_PTR) && (ptr_en_btn_state != NULL_PTR))
+		{
+			if(BTN_ACTIVATED == ptr_st_btn_config->en_btn_activation)
 			{
-				case BTN_INTERNAL_PULL_UP:
-				case BTN_EXTERNAL_PULL_UP:
+				/* get the value on the button pin */
+				gpio_getPinVal((en_gpio_port_t) ptr_st_btn_config->en_btn_port,
+											(en_gpio_pin_t)  ptr_st_btn_config->en_btn_pin ,
+												&lo_en_btn_val);
+		
+				/* Get the button state (pressed or not) according to the pull type */
+				switch (ptr_st_btn_config->en_btn_pull_type)
 				{
-					*ptr_en_btn_state = (en_btn_state_t_)(!lo_en_btn_val);
-					if(BTN_STATE_PRESSED == *ptr_en_btn_state)
+					case BTN_INTERNAL_PULL_UP:
+					case BTN_EXTERNAL_PULL_UP:
 					{
-						systick_ms_delay(BTN_DEBOUNCE_DELAY);
+						*ptr_en_btn_state = (en_btn_state_t_)(!lo_en_btn_val);
+						break;
 					}
-					break;
+					case BTN_INTERNAL_PULL_DOWN:
+					case BTN_EXTERNAL_PULL_DOWN:
+					{
+						*ptr_en_btn_state = (en_btn_state_t_)lo_en_btn_val;
+						if(BTN_STATE_PRESSED == *ptr_en_btn_state)
+						{
+							systick_ms_delay(BTN_DEBOUNCE_DELAY);
+						}
+						break;
+					}				
+					default : lo_en_btn_status = BTN_STATUS_INVALID_PULL_TYPE;
 				}
-				case BTN_INTERNAL_PULL_DOWN:
-				case BTN_EXTERNAL_PULL_DOWN:
+				
+				if(BTN_STATE_PRESSED == *ptr_en_btn_state)
 				{
-					*ptr_en_btn_state = (en_btn_state_t_)lo_en_btn_val;
-					if(BTN_STATE_PRESSED == *ptr_en_btn_state)
-					{
-						systick_ms_delay(BTN_DEBOUNCE_DELAY);
-					}
-					break;
-				}				
-				default : lo_en_btn_status = BTN_STATUS_INVALID_PULL_TYPE;
+					/* Change the button state (for debouncing) */
+					en_gl_read_state = BTN_READ_BUSY;
+					//systick_ms_delay(BTN_DEBOUNCE_DELAY);
+					gpt_enable_notification(BTN_GPT_CHANNEL);
+					gpt_set_callback(BTN_GPT_CHANNEL, debounce_cbf);
+					gpt_start(BTN_GPT_CHANNEL, BTN_DEBOUNCE_DELAY, TIME_IN_MS);
+				}
+				else
+				{
+					/* Do Nothing */
+				}
+			}
+			else
+			{
+				lo_en_btn_status = BTN_STATUS_DEACTIVATED;
 			}
 		}
 		else
 		{
-			lo_en_btn_status = BTN_STATUS_DEACTIVATED;
+			lo_en_btn_status = BTN_STATUS_INVALID_STATE;
 		}
 	}
 	else
 	{
-		lo_en_btn_status = BTN_STATUS_INVALID_STATE;
+		lo_en_btn_status = BTN_STATUS_BUSY;
 	}
 
 	return lo_en_btn_status;
@@ -203,4 +243,13 @@ en_btn_status_code_t_ btn_set_notification(st_btn_config_t_* ptr_str_btn_config,
 	}
 	
 	return lo_en_btn_status;
+}
+
+static void debounce_cbf(void)
+{
+	/* Change the read function state */
+	en_gl_read_state = BTN_READ_IDLE;
+	
+	/* Stop the timer */
+	gpt_stop(BTN_GPT_CHANNEL);
 }

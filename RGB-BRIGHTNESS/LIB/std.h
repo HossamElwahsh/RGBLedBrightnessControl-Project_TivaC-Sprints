@@ -20,11 +20,21 @@ typedef                     void        vd_t_;
 
 typedef unsigned 		char								boolean;
 
+typedef     void     (* ptr_vd_fun_vd_t)    (void);
+
+#define GET_PERCENTAGE(x) ((f64_t_) x/100.0)
+#define INC_WITH_MOD(num,mod)     ((num + 1) % mod)
+
 #define TRUE        1
 #define FALSE       0
 
 #define NULL        (0)
 #define ZERO        (0)
 #define NULL_PTR    ((void *) 0)
+
+#define MAX_8_BIT_VAL   0xFF
+#define MAX_16_BIT_VAL  0xFFFF
+#define MAX_24_BIT_VAL  0xFFFFFF
+#define MAX_32_BIT_VAL  0xFFFFFFFF
 
 #endif /* STD_H_ */
