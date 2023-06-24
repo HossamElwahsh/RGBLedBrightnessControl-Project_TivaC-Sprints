@@ -158,6 +158,23 @@ en_pwm_error_t pwm_start(en_pwm_channel_id_t en_a_channel_id)
 		if (ZERO == arr_gl_st_signal_state[en_a_channel_id].on_time)
 		{
 			/* Set all pins on the channel to low */
+			for (u8_lo_pin_iterator = ZERO; u8_lo_pin_iterator < PWM_MAX_PINS_PER_CHANNEL; u8_lo_pin_iterator++)
+			{
+				st_gpio_cfg_t st_lo_pwm_pin;
+
+				//if (NULL == arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].port) continue;
+
+				st_lo_pwm_pin.port = (en_gpio_port_t)(arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].port);
+				st_lo_pwm_pin.pin = (en_gpio_pin_t)(arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].pin);
+
+				en_lo_error_state = (en_pwm_error_t)gpio_setPinVal(st_lo_pwm_pin.port, st_lo_pwm_pin.pin, LOW);
+
+				if (PWM_OK != en_lo_error_state)
+				{
+					en_lo_error_state = PWM_ERROR;
+					break;
+				}
+			}
 		}
 		else
 		{
@@ -212,6 +229,7 @@ en_pwm_error_t pwm_start(en_pwm_channel_id_t en_a_channel_id)
 en_pwm_error_t pwm_stop(en_pwm_channel_id_t en_a_channel_id)
 {
 	en_pwm_error_t en_lo_error_state = PWM_OK;
+	uint8_t_ u8_lo_pin_iterator;
 	
 	if(en_a_channel_id < PWM_CHANNEL_TOTAL)
 	{
@@ -221,6 +239,25 @@ en_pwm_error_t pwm_stop(en_pwm_channel_id_t en_a_channel_id)
 	
 			if(PWM_OK == en_lo_error_state)
 			{
+				/* Set all pins on the channel to low */
+				for (u8_lo_pin_iterator = ZERO; u8_lo_pin_iterator < PWM_MAX_PINS_PER_CHANNEL; u8_lo_pin_iterator++)
+				{
+					st_gpio_cfg_t st_lo_pwm_pin;
+	
+					//if (NULL == arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].port) continue;
+	
+					st_lo_pwm_pin.port = (en_gpio_port_t)(arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].port);
+					st_lo_pwm_pin.pin = (en_gpio_pin_t)(arr_gl_st_signal_cfg[en_a_channel_id].pins_per_channel[u8_lo_pin_iterator].pin);
+	
+					en_lo_error_state = (en_pwm_error_t)gpio_setPinVal(st_lo_pwm_pin.port, st_lo_pwm_pin.pin, LOW);
+	
+					if (PWM_OK != en_lo_error_state)
+					{
+						en_lo_error_state = PWM_ERROR;
+						break;
+					}
+				}
+			
 				/* Update the channel state */
 				arr_gl_st_signal_state[en_a_channel_id].channel_state = CHANNEL_DISABLED;
 				u8_gl_active_channels--;
