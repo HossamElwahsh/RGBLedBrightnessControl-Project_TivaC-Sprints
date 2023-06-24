@@ -11,7 +11,6 @@
 /*
  * Includes */
 #include "app.h"
-#include "led_interface.h"
 #include "btn_interface.h"
 #include "pwm_interface.h"
 
@@ -53,19 +52,6 @@ typedef enum{
 #define USER_BTN_PORT		BTN_PORT_F // Port F
 #define USER_BTN_PIN		BTN_PIN_4
 
-
-typedef struct{
-    en_led_port_t_ en_led_port;
-    en_led_pin_t_ en_led_pin;
-}st_app_led_t;
-
-static st_app_led_t gl_st_app_leds[RGB_LEDS_COUNT] =
-{
-        {RED_LED_PORT, RED_LED_PIN},
-        {BLUE_LED_PORT, BLUE_LED_PIN},
-        {GREEN_LED_PORT, GREEN_LED_PIN}
-};
-
 /*
  * Private Variables */
 static en_app_state_t gl_en_app_state = RUNNING;
@@ -91,13 +77,6 @@ en_app_error_t app_init(void)
 {
     en_app_error_t en_app_error_retval = APP_OK;
     en_btn_status_code_t_ en_btn_status_code = BTN_STATUS_OK;
-    en_led_error_t_ en_led_error = LED_OK;
-
-    /* init RGB LEDS */
-    for (int i = ZERO; i < RGB_LEDS_COUNT; ++i) {
-        en_led_error = led_init(gl_st_app_leds[i].en_led_port, gl_st_app_leds[i].en_led_pin);
-        if(LED_OK != en_led_error) en_app_error_retval = APP_FAIL;
-    }
 
     // init button
     en_btn_status_code = btn_init(&gl_st_user_btn_cfg);
@@ -123,54 +102,36 @@ void app_start(void)
             // set app state -> switching
             gl_en_app_state = SWITCHING;
 
-            switch (gl_en_app_sub_state) {
-								case SUB_STATE_0_DUTY_IN_PERCENT:
-									  gl_en_app_sub_state = SUB_STATE_1_DUTY_IN_PERCENT;
-										break;
-							
-                case SUB_STATE_1_DUTY_IN_PERCENT:
-                    gl_en_app_sub_state = SUB_STATE_2_DUTY_IN_PERCENT;
-                    break;
-
-                case SUB_STATE_2_DUTY_IN_PERCENT:
-                    gl_en_app_sub_state = SUB_STATE_3_DUTY_IN_PERCENT;
-                    break;
-
-                case SUB_STATE_3_DUTY_IN_PERCENT:
-                case SUB_STATES_TOTAL:
-                default:
-                    gl_en_app_sub_state = SUB_STATE_0_DUTY_IN_PERCENT;
-                    break;
+            if (gl_en_app_sub_state == SUB_STATE_0_DUTY_IN_PERCENT)
+            {
+                gl_en_app_sub_state = SUB_STATE_1_DUTY_IN_PERCENT;
             }
+            else if (gl_en_app_sub_state == SUB_STATE_1_DUTY_IN_PERCENT)
+            {
+                gl_en_app_sub_state = SUB_STATE_2_DUTY_IN_PERCENT;
+            }
+            else if (gl_en_app_sub_state == SUB_STATE_2_DUTY_IN_PERCENT)
+            {
+                gl_en_app_sub_state = SUB_STATE_3_DUTY_IN_PERCENT;
+            }
+            else {
+                gl_en_app_sub_state = SUB_STATE_0_DUTY_IN_PERCENT;
+            }
+
         }
         else
         {
             /* Do Nothing */
         }
 
-        switch (gl_en_app_state) {
-
-            case RUNNING:
-            {
-                /* Do Nothing */
-                break;
-            }
-            case SWITCHING:
-            {
-                app_next_state();
-
-                gl_en_app_state = RUNNING;
-                break;
-            }
-            case STATES_TOTAL:
-            default:
-            {
-                /* Bad state reset to idle */
-                gl_en_app_state  = SWITCHING;
-                break;
-            }
+        if (gl_en_app_state == SWITCHING) {
+            app_next_state();
+            gl_en_app_state = RUNNING;
         }
-
+        else
+        {
+            /* Do Nothing */
+        }
     }
 }
 
@@ -180,7 +141,7 @@ static void app_next_state(void)
     pwm_stop((en_pwm_channel_id_t)gl_u8_current_led_idx);
 
     // turn off previous color led
-    led_off(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
+//    led_off(gl_st_app_leds[gl_u8_current_led_idx].en_led_port, gl_st_app_leds[gl_u8_current_led_idx].en_led_pin);
 
     // next state led color
     gl_u8_current_led_idx = INC_WITH_MOD(gl_u8_current_led_idx, RGB_LEDS_COUNT);
